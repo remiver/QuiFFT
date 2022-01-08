@@ -17,6 +17,10 @@ public class AudioReaderFactory {
      * @throws UnsupportedAudioFileException if file isn't an MP3, WAV, or AIFF file
      */
     public static AudioReader audioReaderFor(File audioFile) throws IOException, UnsupportedAudioFileException {
+        if (audioFile instanceof PCMFile) {
+            return new PCMReader(audioFile);
+        }
+
         String fileExtension = getFileExtension(audioFile);
 
         switch (fileExtension) {
@@ -26,8 +30,8 @@ public class AudioReaderFactory {
             case ".mp3":
                 return new MP3Reader(audioFile);
             default:
-                String msg = String.format("Cannot read file type %s; " +
-                        "please provide a .wav, .aiff, or .mp3 file instead.", fileExtension);
+                String msg = String.format("Cannot read file type %s; please provide a " +
+                        ".wav, .aiff, .mp3 or PCMFile instance instead.", fileExtension);
                 throw new UnsupportedAudioFileException(msg);
         }
     }

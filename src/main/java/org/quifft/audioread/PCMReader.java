@@ -5,6 +5,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
@@ -26,6 +27,7 @@ public class PCMReader extends AudioReader {
     @Override
     public long getFileDurationMs() {
         AudioFormat format = inputStream.getFormat();
+
         long audioFileLength = audio.length();
         int frameSize = format.getFrameSize();
         float frameRate = format.getFrameRate();
@@ -33,10 +35,16 @@ public class PCMReader extends AudioReader {
     }
 
     private void getInputStream() throws IOException, UnsupportedAudioFileException {
-        inputStream = AudioSystem.getAudioInputStream(audio);
+        if (audio instanceof PCMFile) {
+            AudioFormat format = ((PCMFile) audio).getAudioFormat();
+            inputStream = new AudioInputStream(new FileInputStream(audio),
+                    format, audio.length() / format.getFrameSize());
+        } else {
+            inputStream = AudioSystem.getAudioInputStream(audio);
+        }
 
         // convert 8-bit audio into 16-bit
-        if(inputStream.getFormat().getSampleSizeInBits() == 8) {
+        if(getAudioFormat().getSampleSizeInBits() == 8) {
             getInputStreamAs8Bit();
         }
     }
